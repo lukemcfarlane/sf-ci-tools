@@ -1,0 +1,4 @@
+src
+config
+*.sublime*
+node_modules
