@@ -5,14 +5,15 @@ var zip = require('gulp-zip');
 var forceDeploy = require('gulp-jsforce-deploy');
 
 var rootDir = !!config.rootDir ? config.rootDir : '.';
+var endpoint = !!config.endpoint ? config.endpoint : 'https://test.salesforce.com';
  
 gulp.task('deploy', ['compressResources'], function() {
   gulp.src(rootDir + '/src/**', { base: rootDir })
     .pipe(zip('package.zip'))
     .pipe(forceDeploy({
       username: process.env.SF_USERNAME,
-      password: process.env.SF_PASSWORD
-      //, loginUrl: 'https://test.salesforce.com' 
+      password: process.env.SF_PASSWORD,
+      loginUrl: endpoint
       // , pollTimeout: 120*1000 
       // , pollInterval: 10*1000 
       // , version: '33.0' 

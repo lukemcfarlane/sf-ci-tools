@@ -1,3 +1,4 @@
 {
-  "rootDir": "example"
+  "rootDir": "example",
+  "endpoint": "https://login.salesforce.com"
 }
