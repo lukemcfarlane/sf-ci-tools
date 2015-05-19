@@ -2,3 +2,5 @@ config
 *.sublime*
 node_modules
 *.resource
+*.log
+.credentials
