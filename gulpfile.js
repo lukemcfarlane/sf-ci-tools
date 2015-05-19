@@ -9,21 +9,54 @@ var tap = require('gulp-tap');
 var prompt = require('gulp-prompt');
 var zip = require('gulp-zip');
 var forceDeploy = require('gulp-jsforce-deploy');
+var _ = require('lodash');
 
 var rootDir = !!config.rootDir ? config.rootDir : '.';
 var endpoint = !!config.endpoint ? config.endpoint : 'https://test.salesforce.com';
+var username, password;
  
-gulp.task('deploy', ['compressResources'], function() {
+gulp.task('deploy', [ 'getCredentials', 'compressResources'], function() {
   gulp.src(rootDir + '/src/**', { base: rootDir })
+    .pipe(prompt.confirm('Deploying with username \'' + username + '\', ' + 
+      'do you wish to continue?'))
     .pipe(zip('package.zip'))
     .pipe(forceDeploy({
-      username: process.env.SF_USERNAME,
-      password: process.env.SF_PASSWORD,
+      username: username,
+      password: password,
       loginUrl: endpoint
-      // , pollTimeout: 120*1000 
-      // , pollInterval: 10*1000 
-      // , version: '33.0' 
     }));
+});
+
+gulp.task('getCredentials', function(callback) {
+  var credentials = [];
+  gulp.src('.credentials').pipe(tap(function(file, t) {
+    credentials = JSON.parse(file.contents.toString());
+  }))
+  .pipe(prompt.prompt([{
+      type: 'list',
+      name: 'target',
+      message: 'Please select target organization',
+      choices: function() {
+        return credentials.map(function(cred) {
+          return {
+            name: cred.name,
+            value: cred.username
+          };
+        });
+      }
+    }, {
+      type: 'password',
+      name: 'passphrase',
+      message: 'Please enter passphrase'
+  }], function(res) {
+    var selected = _.findWhere(credentials, {
+      username: res.target
+    });
+    username = selected.username;
+    password = decrypt(selected.password, res.passphrase) +
+      decrypt(selected.token, res.passphrase);
+    callback();
+  }));
 });
 
 gulp.task('compressResources', function() {
