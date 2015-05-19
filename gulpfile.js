@@ -12,8 +12,7 @@ var forceDeploy = require('gulp-jsforce-deploy');
 var _ = require('lodash');
 
 var rootDir = !!config.rootDir ? config.rootDir : '.';
-var endpoint = !!config.endpoint ? config.endpoint : 'https://test.salesforce.com';
-var username, password;
+var username, password, endpoint;
  
 gulp.task('deploy', [ 'getCredentials', 'compressResources'], function() {
   gulp.src(rootDir + '/src/**', { base: rootDir })
@@ -28,35 +27,47 @@ gulp.task('deploy', [ 'getCredentials', 'compressResources'], function() {
 });
 
 gulp.task('getCredentials', function(callback) {
-  var credentials = [];
-  gulp.src('.credentials').pipe(tap(function(file, t) {
-    credentials = JSON.parse(file.contents.toString());
-  }))
-  .pipe(prompt.prompt([{
-      type: 'list',
-      name: 'target',
-      message: 'Please select target organization',
-      choices: function() {
-        return credentials.map(function(cred) {
-          return {
-            name: cred.name,
-            value: cred.username
-          };
-        });
-      }
-    }, {
-      type: 'password',
-      name: 'passphrase',
-      message: 'Please enter passphrase'
-  }], function(res) {
-    var selected = _.findWhere(credentials, {
-      username: res.target
-    });
-    username = selected.username;
-    password = decrypt(selected.password, res.passphrase) +
-      decrypt(selected.token, res.passphrase);
+  if(process.env.SF_USERNAME && process.env.SF_PASSWORD) {
+    endpoint = !!config.endpoint ? config.endpoint : 'https://test.salesforce.com';
+    username = process.env.SF_USERNAME;
+    password = process.env.SF_PASSWORD;
     callback();
-  }));
+  } else {
+    var credentials = [];
+    gulp.src('.credentials').pipe(tap(function(file, t) {
+      credentials = JSON.parse(file.contents.toString());
+    }))
+    .pipe(prompt.prompt([{
+        type: 'list',
+        name: 'target',
+        message: 'Please select target organization',
+        choices: function() {
+          return credentials.map(function(cred) {
+            return {
+              name: cred.name,
+              value: cred.username
+            };
+          });
+        }
+      }, {
+        type: 'password',
+        name: 'passphrase',
+        message: 'Please enter passphrase'
+    }], function(res) {
+      var selected = _.findWhere(credentials, {
+        username: res.target
+      });
+      username = selected.username;
+      password = decrypt(selected.password, res.passphrase) +
+        decrypt(selected.token, res.passphrase);
+      endpoint = ({
+        sandbox: 'https://test.salesforce.com',
+        production: 'https://login.salesforce.com',
+        dev: 'https://login.salesforce.com'
+      })[selected.type];
+      callback();
+    }));
+  }
 });
 
 gulp.task('compressResources', function() {
