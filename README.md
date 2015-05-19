@@ -9,9 +9,20 @@ How to use
 
 1. Copy gulpfile.js & package.json into your Force.com project directory
 2. `npm install`
-3. `export SF_USERNAME=<username>`
-4. `export SF_PASSWORD=<password>`
-5. `gulp <task_name>`
+3. `gulp <task_name>`
+
+### Specifying credentials
+
+Credentials can be specified either via environment variables:
+
+`export SF_USERNAME=<username>`
+`export SF_PASSWORD=<password>`
+
+Or via the included task which will encrypt and store them in a file in the current directory:
+
+`gulp addCredentials`
+
+The deploy task will default to using credentials from environment variables if they exist, or will prompt for which stored credentials to use otherwise.
 
 
 Tasks
