@@ -1,4 +1,5 @@
 {
   "rootDir": "example",
-  "endpoint": "https://login.salesforce.com"
+  "endpoint": "https://login.salesforce.com",
+  "retrievedPkgPath": "retrievedPkg"
 }

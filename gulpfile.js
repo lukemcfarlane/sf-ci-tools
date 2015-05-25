@@ -1,15 +1,20 @@
 var gulp = require('gulp');
 var crypto = require('crypto');
-var through2 = require('through2');
+var through = require('through2');
 var fs = require('fs-extra');
-var config = require('./config.json');
+var File = require('vinyl');
 var forEach = require('gulp-foreach');
 var insert = require('gulp-insert');
 var tap = require('gulp-tap');
 var prompt = require('gulp-prompt');
 var zip = require('gulp-zip');
+var unzip = require('gulp-unzip');
 var forceDeploy = require('gulp-jsforce-deploy');
+var jsforce = require('jsforce');
 var _ = require('lodash');
+
+var config = require('./config.json');
+var sfpackage = require('./sfpackage.json');
 
 var rootDir = !!config.rootDir ? config.rootDir : '.';
 var username, password, endpoint;
@@ -24,6 +29,34 @@ gulp.task('deploy', [ 'getCredentials', 'compressResources'], function() {
       password: password,
       loginUrl: endpoint
     }));
+});
+
+gulp.task('retrieve', [ 'getCredentials' ], function(callback) {
+  var retrievedPkgPath = !!config.retrievedPkgPath ? config.retrievedPkgPath : 'temppackage';
+  fs.remove('./' + retrievedPkgPath, function(err) {
+    if(!!err) return console.log(err);
+    var conn = new jsforce.Connection({ loginUrl: endpoint });
+    var options = {
+      username: username,
+      password: password
+    };
+    (
+      options.username && options.password ?
+      conn.login(options.username, options.password).then(function() { return conn.identity(); }) :
+      conn.identity()
+    )
+      .then(function(identity) {
+        console.log('Logged in as : ' + identity.username);
+        console.log('Retrieving from server...');
+        conn.metadata.retrieve({
+          singlePackage: true,
+          unpackaged: sfpackage
+        })
+          .stream()
+          .pipe(unzip())
+          .pipe(gulp.dest('./' + retrievedPkgPath));
+      });
+  });
 });
 
 gulp.task('getCredentials', function(callback) {
