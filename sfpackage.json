@@ -1,0 +1,16 @@
+{
+  "types": [{
+      "name": "ApexClass",
+      "members": "*"
+    }, {
+      "name": "ApexPage",
+      "members": "*"
+    }, {
+      "name": "ApexTrigger",
+      "members": "*"
+    }, {
+      "name": "StaticResource",
+      "members": "*"
+  }],
+  "version": 29.0
+}
