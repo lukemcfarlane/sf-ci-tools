@@ -46,7 +46,7 @@ gulp.task('retrieve', [ 'getCredentials' ], function(callback) {
       conn.identity()
     )
       .then(function(identity) {
-        console.log('Logged in as : ' + identity.username);
+        console.log('Logged in as: ' + identity.username);
         console.log('Retrieving from server...');
         conn.metadata.retrieve({
           singlePackage: true,
@@ -55,6 +55,8 @@ gulp.task('retrieve', [ 'getCredentials' ], function(callback) {
           .stream()
           .pipe(unzip())
           .pipe(gulp.dest('./' + retrievedPkgPath));
+      }, function(err) {
+        console.log('Login failed.\n' + err);
       });
   });
 });
