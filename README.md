@@ -6,7 +6,12 @@ Gulp tasks for deploying metadata to and refreshing metadata from Force.com in a
 How to use
 ----------
 
-1. Copy gulpfile.js & package.json into your Force.com project directory
+1. Copy the following files into your Force.com project directory:
+    * package.json
+    * config.json
+    * sfpackage.json
+    * gulpfile.js
+
 2. Ensure that node/npm is installed: 
 
    http://blog.npmjs.org/post/85484771375/how-to-install-npm
