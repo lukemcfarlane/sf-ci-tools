@@ -2,7 +2,7 @@ var gulp = require('gulp');
 var crypto = require('crypto');
 var through = require('through2');
 var fs = require('fs-extra');
-var File = require('vinyl');
+var File2 = require('vinyl');
 var forEach = require('gulp-foreach');
 var insert = require('gulp-insert');
 var tap = require('gulp-tap');
@@ -53,8 +53,24 @@ gulp.task('retrieve', [ 'getCredentials' ], function(callback) {
           unpackaged: sfpackage
         })
           .stream()
+          .pipe(through.obj(function(chunk, enc, cb) {
+            var vinylFile = new File2({
+              cwd: rootDir,
+              base: rootDir,
+              path: rootDir + '/package.zip',
+              contents: chunk
+            });
+            this.push(vinylFile);
+            cb();
+          }))
           .pipe(unzip())
-          .pipe(gulp.dest('./' + retrievedPkgPath));
+          .pipe(gulp.dest('./' + retrievedPkgPath))
+          .on('end', function() {
+            console.log('Metadata retrieval completed successfully.');
+          })
+          .on('error', function(err) {
+            console.log('Failed to retrieve metadata: ' + err);
+          });
       }, function(err) {
         console.log('Login failed.\n' + err);
       });
