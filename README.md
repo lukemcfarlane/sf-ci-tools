@@ -79,7 +79,7 @@ Updates static resources by compressing each subdirectory in resource-bundles fo
 
 Compresses all resource bundles then deploys all project metadata to Force.com.
 
-### `gulp retrieve` (unstable)
+### `gulp retrieve`
 
 Retrieves metadata from Force.com that is specified in sfpackage.json, and saves it into a new subdirectory. The path of the subdirectory is determined by the `retrievedPkgPath` option in config.json.
 
